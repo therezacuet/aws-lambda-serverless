@@ -11,9 +11,6 @@ import com.me.awslambdatest.service.UserDeviceTokenService;
 import org.apache.log4j.Logger;
 import java.util.Collections;
 import java.util.Map;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class RegisterUserDeviceHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
     
