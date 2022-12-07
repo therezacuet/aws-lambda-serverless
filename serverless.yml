@@ -1,0 +1,90 @@
+service: pushnotification
+
+custom:
+  userDeviceTokenTableName: 'user-device-token-${self:provider.stage}'
+
+provider:
+  name: aws
+  runtime: java11
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ap-northeast-1'}
+  iam:
+    role:
+      statements:
+        -   Effect: Allow
+            Action:
+              - dynamodb:Query
+              - dynamodb:Scan
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+              - dynamodb:DeleteItem
+            Resource: 'arn:aws:dynamodb:ap-northeast-1:*:*'
+  environment:
+    USER_DEVICE_TOKEN_TABLE_NAME: ${self:custom.userDeviceTokenTableName}
+
+package:
+  artifact: 'target/${self:service}-${self:provider.stage}.jar'
+functions:
+  getUserSubscription:
+    handler: com.me.awslambdatest.handlers.GetUserSubscriptionHandler::handleRequest
+    events:
+      - http:
+          path: /user/{id}/subscriptions
+          method: get
+  registerUserDevice:
+    handler: com.me.awslambdatest.handlers.RegisterUserDeviceHandler::handleRequest
+    events:
+      - http:
+          path: /user/subscription
+          method: post
+  unregisterUserDevice:
+    handler: com.me.awslambdatest.handlers.UnregisterUserDeviceHandler::handleRequest
+    timeout: 20
+    events:
+      - http:
+          path: /user/{id}/device/{deviceId}
+          method: delete
+resources:
+  Resources:
+    UserDeviceTokenDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.userDeviceTokenTableName}
+        AttributeDefinitions:
+          - AttributeName: "PartitionKey"
+            AttributeType: "S"
+          - AttributeName: "GSI1PartitionKey"
+            AttributeType: "S"
+          - AttributeName: "GSI2PartitionKey"
+            AttributeType: "S"
+        GlobalSecondaryIndexes:
+          - IndexName: "GSI1"
+            KeySchema:
+              - AttributeName: "GSI1PartitionKey"
+                KeyType: "HASH"
+            Projection:
+              NonKeyAttributes:
+                - "Token"
+              ProjectionType: "INCLUDE"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: "GSI2"
+            KeySchema:
+              - AttributeName: "GSI2PartitionKey"
+                KeyType: "HASH"
+            Projection:
+              NonKeyAttributes:
+                - "DeviceId"
+              ProjectionType: "INCLUDE"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+        KeySchema:
+          - AttributeName: "PartitionKey"
+            KeyType: "HASH"
+
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5

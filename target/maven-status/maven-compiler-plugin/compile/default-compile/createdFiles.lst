@@ -1,0 +1,10 @@
+com/me/awslambdatest/dynamodb/AbstractDynamoDBEntity.class
+com/me/awslambdatest/ApiGatewayResponse.class
+com/me/awslambdatest/dynamodb/DynamoDBAdapter.class
+com/me/awslambdatest/models/UserDeviceToken.class
+com/me/awslambdatest/handlers/UnregisterUserDeviceHandler.class
+com/me/awslambdatest/service/UserDeviceTokenService.class
+com/me/awslambdatest/handlers/GetUserSubscriptionHandler.class
+com/me/awslambdatest/ApiGatewayResponse$Builder.class
+com/me/awslambdatest/models/Response.class
+com/me/awslambdatest/handlers/RegisterUserDeviceHandler.class
